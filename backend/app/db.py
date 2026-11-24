@@ -1,4 +1,5 @@
 import os
+import re
 from collections.abc import Iterator
 from datetime import UTC, datetime
 
@@ -6,7 +7,8 @@ from sqlalchemy import DateTime, create_engine
 from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
 from sqlalchemy.types import TypeDecorator
 
-DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./auction.db")
+# Hosts (Railway, Render, Heroku) hand out postgres:// URLs; SQLAlchemy needs the driver named.
+DATABASE_URL = re.sub(r"^postgres(ql)?://", "postgresql+psycopg://", os.getenv("DATABASE_URL", "sqlite:///./auction.db"))
 
 engine = create_engine(
     DATABASE_URL,

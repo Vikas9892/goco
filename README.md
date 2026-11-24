@@ -2,7 +2,9 @@
 
 A reverse ("British") auction for freight RFQs. Suppliers bid openly and keep undercutting each other. Late activity automatically extends the auction, and a hard **forced close** guarantees it ends.
 
-**Stack:** FastAPI · SQLAlchemy 2 · PostgreSQL · React 18 + TypeScript · WebSockets · Docker
+[![CI](https://github.com/Vikas9892/goco/actions/workflows/ci.yml/badge.svg)](https://github.com/Vikas9892/goco/actions/workflows/ci.yml)
+
+**Stack:** FastAPI · SQLAlchemy 2 · PostgreSQL · React 18 + TypeScript · WebSockets · Docker · GitHub Actions
 
 ```bash
 docker compose up --build                            # http://localhost:8000
@@ -14,7 +16,7 @@ docker compose exec app python -m app.seed           # demo auctions: live, forc
 ```bash
 cd backend  && pip install -r requirements.txt && python -m app.seed && uvicorn app.main:app --reload
 cd frontend && npm install && npm run dev            # http://localhost:5173 (proxies /api to :8000)
-cd backend  && python -m pytest                      # 14 tests
+cd backend  && python -m pytest                      # 15 tests
 ```
 </details>
 
@@ -137,12 +139,13 @@ erDiagram
 | `GET` | `/api/rfqs/{id}` | Details: ranking, quotes, config, activity log, stats |
 | `POST` | `/api/rfqs/{id}/bids` | Place a bid. Returns `409` if the auction is closed or the bid doesn't beat the supplier's own best |
 | `WS` | `/api/rfqs/{id}/live` | Push notifications for that auction |
+| `POST` | `/api/demo` | Start a demo auction that closes in 5 minutes, with seeded bids |
 
 Interactive docs are at `/docs`.
 
 ## 4. Frontend
 
-- **Listing:** every auction with its live countdown and status badge.
+- **Listing:** every auction with its live countdown and status badge. **▶ Start live demo** creates an auction that closes in 5 minutes, with its extension window opening in 2. Outbid L1 inside the window to watch the clock extend.
 - **Details:**
   - The **timeline bar** shows start → original close → extended close → forced close, plus the live trigger window, so the British-auction mechanics are visible at a glance.
   - The countdown turns amber inside the trigger window and pulses when the auction is extended.
