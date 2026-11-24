@@ -4,6 +4,10 @@ A reverse ("British") auction for freight RFQs. Suppliers bid openly and keep un
 
 [![CI](https://github.com/Vikas9892/goco/actions/workflows/ci.yml/badge.svg)](https://github.com/Vikas9892/goco/actions/workflows/ci.yml)
 
+### **Live demo: https://goco-8p4i.onrender.com**
+
+Click **▶ Start live demo**, wait about 2 minutes for the extension window, then outbid L1 and watch the close time extend. Open it in two tabs to see updates arrive live. The free hosting sleeps when idle, so the first load may take up to a minute.
+
 **Stack:** FastAPI · SQLAlchemy 2 · PostgreSQL · React 18 + TypeScript · WebSockets · Docker · GitHub Actions
 
 ```bash
