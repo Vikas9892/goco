@@ -100,6 +100,11 @@ def test_supplier_must_beat_own_previous_bid(api):
     assert "lower than your previous best" in r.json()["detail"]
 
 
+def test_demo_endpoint_starts_a_live_auction(api):
+    detail = api.post("/api/demo").json()
+    assert (detail["status"], detail["stats"]["bid_count"]) == ("active", 4)
+
+
 def test_listing_shows_lowest_bid_and_status(api):
     create(api)
     bid(api, "Maersk", 500)

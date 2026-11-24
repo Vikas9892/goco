@@ -78,7 +78,11 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     headers: { "Content-Type": "application/json", ...init?.headers },
   });
   const body = await res.json().catch(() => null);
-  if (!res.ok) throw new Error(errorMessage(body) ?? `Request failed (${res.status})`);
+  if (!res.ok) {
+    // A 5xx with no JSON body means the API never answered (e.g. dev proxy can't reach :8000).
+    const fallback = res.status >= 500 ? "Can't reach the auction server. Is the backend running?" : `Request failed (${res.status})`;
+    throw new Error(errorMessage(body) ?? fallback);
+  }
   return body as T;
 }
 
@@ -92,6 +96,7 @@ function errorMessage(body: any): string | undefined {
 export const api = {
   listRfqs: () => request<RfqSummary[]>("/rfqs"),
   getRfq: (id: number) => request<RfqDetail>(`/rfqs/${id}`),
+  startDemo: () => request<RfqDetail>("/demo", { method: "POST" }),
   createRfq: (input: RfqInput) => request<RfqDetail>("/rfqs", { method: "POST", body: JSON.stringify(input) }),
   placeBid: (id: number, input: BidInput) =>
     request<RfqDetail>(`/rfqs/${id}/bids`, { method: "POST", body: JSON.stringify(input) }),

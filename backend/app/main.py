@@ -1,3 +1,4 @@
+import os
 from contextlib import asynccontextmanager
 from datetime import UTC, datetime
 from pathlib import Path
@@ -6,10 +7,12 @@ from typing import Annotated
 from fastapi import APIRouter, BackgroundTasks, Depends, FastAPI, Request, WebSocket, WebSocketDisconnect
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
-from . import service
-from .db import Base, engine, get_db
+from . import seed, service
+from .db import Base, SessionLocal, engine, get_db
+from .models import Rfq
 from .realtime import hub
 from .schemas import BidCreate, RfqCreate, RfqDetail, RfqSummary
 
@@ -17,6 +20,10 @@ from .schemas import BidCreate, RfqCreate, RfqDetail, RfqSummary
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     Base.metadata.create_all(engine)  # shortcut: no migrations; add Alembic once the schema has to evolve in prod
+    if os.getenv("SEED_DEMO"):  # hosted demo: give first-time visitors something to look at
+        with SessionLocal() as db:
+            if db.scalar(select(func.count(Rfq.id))) == 0:
+                seed.main()
     yield
 
 
@@ -57,6 +64,12 @@ def place_bid(rfq_id: int, data: BidCreate, db: Db, now: Now, tasks: BackgroundT
     rfq = service.place_bid(db, rfq_id, data, now)
     tasks.add_task(hub.publish, rfq_id)  # runs after the response, i.e. after the commit is visible
     return service.rfq_detail(rfq, now)
+
+
+@api.post("/demo", response_model=RfqDetail, status_code=201)
+def start_demo(db: Db, now: Now):
+    """A fresh auction closing in 5 minutes, so anyone with the link can watch an extension happen."""
+    return service.rfq_detail(seed.live_auction(db, now), now)
 
 
 @api.websocket("/rfqs/{rfq_id}/live")

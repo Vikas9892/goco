@@ -15,13 +15,33 @@ export function AuctionList() {
   const load = useCallback(() => api.listRfqs().then(setRfqs, (e: Error) => setError(e.message)), []);
   usePolling(load, 5000);
 
+  const startDemo = () => api.startDemo().then((rfq) => navigate(`/rfqs/${rfq.id}`), (e: Error) => setError(e.message));
+
   return (
     <>
       <header className="page-header">
-        <h1>British Auctions</h1>
-        <Link to="/new" className="button">+ New RFQ</Link>
+        <div>
+          <h1>British Auctions</h1>
+          <p className="muted">Live reverse auctions for freight RFQs. Late bids extend the clock, up to the forced close.</p>
+        </div>
+        <div className="actions">
+          <button className="button-secondary" onClick={startDemo} title="Creates an auction that closes in 5 minutes">
+            ▶ Start live demo
+          </button>
+          <Link to="/new" className="button">+ New RFQ</Link>
+        </div>
       </header>
-      {error && <p className="error">{error}</p>}
+      {rfqs && (
+        <section className="stats">
+          {(["active", "scheduled", "closed", "force_closed"] as const).map((s) => (
+            <div key={s} className="stat">
+              <StatusBadge status={s} />
+              <strong>{rfqs.filter((r) => r.status === s).length}</strong>
+            </div>
+          ))}
+        </section>
+      )}
+      {error && <p className="error banner" role="alert">{error}</p>}
       {rfqs?.length === 0 && <p className="muted">No auctions yet. Create one, or run <code>python -m app.seed</code>.</p>}
       {!!rfqs?.length && (
         <div className="card table-scroll">
