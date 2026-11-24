@@ -27,7 +27,7 @@ export function Timeline({ rfq, now }: { rfq: RfqDetail; now: number }) {
       <figcaption className="timeline-legend">
         <span>Start {clock(rfq.bid_start_at)}</span>
         <span><i className="dot dot-base" />Original close {clock(rfq.original_close_at)}</span>
-        <span><i className="dot dot-extended" />Extended to {clock(rfq.bid_close_at)}</span>
+        {close > t(rfq.original_close_at) && <span><i className="dot dot-extended" />Extended to {clock(rfq.bid_close_at)}</span>}
         <span><i className="dot dot-window" />Trigger window ({rfq.config.trigger_window_minutes}m)</span>
         <span>Forced close {clock(rfq.forced_close_at)}</span>
       </figcaption>
