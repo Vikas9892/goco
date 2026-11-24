@@ -11,6 +11,8 @@ docker compose up --build                            # http://localhost:8000
 docker compose exec app python -m app.seed           # demo auctions: live, force-closed, closed, scheduled
 ```
 
+**Deploy:** `render.yaml` is a Render Blueprint. Choose *New → Blueprint* and pick this repo to get the app and Postgres on the free plan.
+
 <details><summary>Run without Docker (SQLite, zero setup)</summary>
 
 ```bash
